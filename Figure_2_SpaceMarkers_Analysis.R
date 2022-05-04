@@ -9,7 +9,7 @@ rngtools::RNGseed(123)
 ## Set these parameters
 # SpInMarkersMode: defaut mode is "residual". You can also set "DE" mode for Differential Expression mode.
 SpaceMarkersMode = "DE"  
-# SpinMarkersRefPattern is the pattern whose "interaction" with every other pattern we want to study. If refPattern is not explicitly assigned, the code assumes Pattern_1 to be refPattern.
+# SpinMarkersRefPattern is the pattern whose "interaction" with every other pattern we want to study. If refPattern is not explicitly assigned, the code assumes Pattern_1 to be refPattern. Here the met-PDAC pattern "Pattern_6" is treated as the reference.
 SpaceMarkersRefPattern = "Pattern_6" 
 
 countPath <- list.files(dataFolder, pattern = "countsMatrix",full.names = T)

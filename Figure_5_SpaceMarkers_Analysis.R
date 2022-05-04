@@ -31,7 +31,7 @@ rngtools::RNGseed(123)
 ## Set these parameters
 # SpaceMarkersMode: defaut mode is "residual". You can also set "DE" mode for Differential Expression mode.
 SpaceMarkersMode = "residual"  
-# SpaceMarkersRefPattern is the pattern whose "interaction" with every other pattern we want to study. If refPattern is not explicitly assigned, the code assumes Pattern_1 to be refPattern.
+# SpaceMarkersRefPattern is the pattern whose "interaction" with every other pattern we want to study. If refPattern is not explicitly assigned, the code assumes Pattern_1 to be refPattern. Here the immune pattern Pattern_8 is the reference.
 SpaceMarkersRefPattern = "Pattern_8" 
 
 ## Loading data
