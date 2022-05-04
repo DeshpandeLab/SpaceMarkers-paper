@@ -1,0 +1,83 @@
+## author: Atul Deshpande
+## email: adeshpande@jhu.edu
+rm(list = ls())
+source('~/FertigLab/SpaceMarkers-paper/patternSpotter.R')
+setwd('.')
+#source("./R/preprocessing.R")
+#source("./R/getSpatialParameters.R")
+#source("./R/getInteractingGenes.R")
+#source('./R/find_genes_of_interest_nonparametric_fast.R')
+## Specify data folder paths here: 
+## Expected structure: parent_folder
+##                              |____ VisiumDir (10x output format)
+##                              |           |____ patient_id1
+##                              |           |____ patient_id2
+##                              |           .   .   .   .   .
+##                              |____ CoGAPS_Analysis
+##                                          |____ patient_id1
+##                                          |           |____ cogapsFilePattern1
+##                                          |           |____ cogapsFilePattern2
+##                                          |             .   .   .   .   .
+##                                          |____ patient_id2
+##                                                      |____ cogapsFilePattern3
+##                                                      |____ cogapsFilePattern4
+##                                                        .   .   .   .   .
+patient_id1 <- '1541'
+visiumDir <- "../ProductionCode/VisiumData/"
+cogapsDir <- "../ProductionCode/CoGAPS_Analysis/"
+cogapsFilePattern <- "1541_15Patterns.rds"
+rngtools::RNGseed(123)
+
+## Set these parameters
+# SpaceMarkersMode: defaut mode is "residual". You can also set "DE" mode for Differential Expression mode.
+SpaceMarkersMode = "residual"  
+# SpaceMarkersRefPattern is the pattern whose "interaction" with every other pattern we want to study. If refPattern is not explicitly assigned, the code assumes Pattern_1 to be refPattern.
+SpaceMarkersRefPattern = "Pattern_8" 
+
+## Loading data
+pVisiumPath <- paste0(visiumDir,patient_id1)
+fullMat <- load10XExpr(pVisiumPath)
+good_gene_threshold <- 3
+goodGenes <- rownames(fullMat)[apply(fullMat,1,function(x) sum(x>0)>=good_gene_threshold)]
+fullMat <- fullMat[goodGenes,]
+spCoords <- load10XCoords(pVisiumPath)
+rownames(spCoords) <- spCoords$barcode
+pCoGAPSPath <- paste0(cogapsDir,patient_id1)
+
+## Matching formats
+cogapsFilePath <- dir(pCoGAPSPath,cogapsFilePattern,full.names = T)
+CoGAPS_Result <- readRDS(cogapsFilePath)
+features <- intersect(rownames(fullMat),rownames(CoGAPS_Result@featureLoadings))
+barcodes <- intersect(colnames(fullMat),rownames(CoGAPS_Result@sampleFactors))
+fullMat <- fullMat[features,barcodes]
+cgMat <- CoGAPS_Result@featureLoadings[features,] %*% t(CoGAPS_Result@sampleFactors[barcodes,])
+spCoords <- spCoords[barcodes,]
+spPatterns <- cbind(spCoords,CoGAPS_Result@sampleFactors[barcodes,])
+
+## patternMarkers
+PMall <- patternMarkers(CoGAPS_Result,threshold = "all")
+PMcut <- patternMarkers(CoGAPS_Result, threshold = "cut")
+names(PMcut$PatternMarkers) <- names(PMall$PatternMarkers)
+maxCounts <- apply(fullMat,1,max)
+PMfiltAll <- lapply(PMall$PatternMarkers, function(PM) PM[which(maxCounts[PM]>2)])
+PMfiltCut <- lapply(PMcut$PatternMarkers, function(PM) PM[which(maxCounts[PM]>2)])
+dfAll <- data.frame(lapply(PMfiltAll, "length<-",max(lengths(PMfiltAll))))
+dfCut <- data.frame(lapply(PMfiltCut, "length<-",max(lengths(PMfiltCut))))
+write.csv(dfAll, file = gsub(pattern = ".rds", replacement = "_patternMarkers_All.csv",cogapsFilePath),row.names = FALSE, na = "")
+write.csv(dfCut, file = gsub(pattern = ".rds", replacement = "_patternMarkers_Cut.csv",cogapsFilePath),row.names = FALSE, na = "")
+
+## Running scripts
+optParams <- getSpatialParameters(spPatterns)
+SpaceMarkers <- getInteractingGenes(data = fullMat, optParams=optParams, reconstruction = cgMat, spatialPatterns = spPatterns, refPattern = SpaceMarkersRefPattern, mode = SpaceMarkersMode)
+SpaceMarkers$optParams <- optParams
+for (i in seq(1,length(SpaceMarkers$interacting_genes)))
+{
+    filename <- paste0(gsub(x = cogapsFilePath,pattern = '.rds',replacement = paste0('_SpaceMarkers_',SpaceMarkersMode,'_')),names(SpaceMarkers$interacting_genes[[i]])[2],gsub(":",".",gsub(c(" "), "_", date())),".txt")
+    write.table(SpaceMarkers$interacting_genes[[i]],file = filename,col.names = F, quote = F)
+}  
+saveRDS(SpaceMarkers,gsub(x = cogapsFilePath,pattern = '.rds',replacement = paste0('_SpaceMarkers_',SpaceMarkersMode,'_',gsub(c(" "), "_", date()),'.rds')))
+
+## patternSpotter Visualization
+pos <- spCoords[,c("x","y")]; pos$y = -pos$y
+patternSpotter(obj = CoGAPS_Result, locs = pos, patternList = c("Pattern_1","Pattern_2","Pattern_8"), spotIndices = NULL, threshold = 2, plotTitle = " ",radius = 3,colors_arr = c("blue","orange","green"))
+
