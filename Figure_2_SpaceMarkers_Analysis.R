@@ -2,9 +2,11 @@ rm(list = ls())
 library(Matrix)
 library(SpatialExperiment)
 library(SpaceMarkers)
+library(CoGAPS)
 setwd("~/FertigLab/SpaceMarkers-paper")
-source('./patternSpotter.R', echo=TRUE)
-dataFolder <- "PDAC_J"
+source('plottingScripts/patternSpotter.R', echo=TRUE)
+dataFolder <- "VisiumData/PDAC_Lymph_Node/"
+cogapsFolder <- "CoGAPS_Analysis/PDAC_Lymph_Node/"
 rngtools::RNGseed(123)
 ## Set these parameters
 # SpInMarkersMode: defaut mode is "residual". You can also set "DE" mode for Differential Expression mode.
@@ -16,7 +18,7 @@ countPath <- list.files(dataFolder, pattern = "countsMatrix",full.names = T)
 imagePath <- list.files(dataFolder, pattern = "image",full.names = T)
 barcodePath <- list.files(dataFolder, pattern = "barcode",full.names = T)
 
-cogapsFilePath <- list.files("PDAC_J", pattern = "_8Pattern.rds",full.names = T)
+cogapsFilePath <- list.files(cogapsFolder, pattern = "_8Pattern.rds",full.names = T)
 
 resultsFolderNames <- paste0(gsub(".rds","",cogapsFilePath),"_Results")
 sapply(resultsFolderNames, function(rName) if (!dir.exists(rName)){dir.create(rName)})

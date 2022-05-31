@@ -1,7 +1,7 @@
 ## author: Atul Deshpande
 ## email: adeshpande@jhu.edu
 rm(list = ls())
-source('~/FertigLab/SpaceMarkers-paper/patternSpotter.R')
+source('plottingScripts/patternSpotter.R')
 setwd('.')
 #source("./R/preprocessing.R")
 #source("./R/getSpatialParameters.R")
@@ -22,9 +22,9 @@ setwd('.')
 ##                                                      |____ cogapsFilePattern3
 ##                                                      |____ cogapsFilePattern4
 ##                                                        .   .   .   .   .
-patient_id1 <- '1541'
-visiumDir <- "../ProductionCode/VisiumData/"
-cogapsDir <- "../ProductionCode/CoGAPS_Analysis/"
+patient_id1 <- 'HCC'
+visiumDir <- "VisiumData/"
+cogapsDir <- "CoGAPS_Analysis/"
 cogapsFilePattern <- "1541_15Patterns.rds"
 rngtools::RNGseed(123)
 

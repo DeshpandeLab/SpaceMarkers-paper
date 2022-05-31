@@ -2,10 +2,7 @@
 ## email: adeshpande@jhu.edu
 rm(list = ls())
 setwd('.')
-#source("./R/preprocessing.R")
-#source("./R/getSpatialParameters.R")
-#source("./R/getInteractingGenes.R")
-#source('./R/find_genes_of_interest_nonparametric_fast.R')
+source('plottingScripts/patternSpotter.R')
 ## Specify data folder paths here: 
 ## Expected structure: parent_folder
 ##                              |____ VisiumDir (10x output format)
@@ -21,9 +18,9 @@ setwd('.')
 ##                                                      |____ cogapsFilePattern3
 ##                                                      |____ cogapsFilePattern4
 ##                                                        .   .   .   .   .
-patient_id1 <- 's182967'
-visiumDir <- "../ProductionCode/VisiumData/"
-cogapsDir <- "../ProductionCode/CoGAPS_Analysis/"
+patient_id1 <- 'BreastCancer'
+visiumDir <- "VisiumData/"
+cogapsDir <- "CoGAPS_Analysis/"
 cogapsFilePattern <- "182967_1168993F_2_CogapsResult_20.rds"
 rngtools::RNGseed(123)
 
